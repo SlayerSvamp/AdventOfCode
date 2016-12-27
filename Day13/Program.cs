@@ -13,7 +13,7 @@ namespace Day13
             int X = 70;
             int Y = 50;
             Console.WindowWidth = X * 2 + 1;
-            Console.WindowHeight = Y + 1;
+            Console.WindowHeight = Y + 1 <= Console.LargestWindowHeight ? Y + 1 : Console.LargestWindowHeight;
             var input = 1350;
             Func<int, int, int> algorithm = (x, y) => (x * x + 3 * x + 2 * x * y + y + y * y) + input;
             Func<int, int> countBits = (i) => Convert.ToString(i, 2).ToCharArray().Count(c => c == '1');
