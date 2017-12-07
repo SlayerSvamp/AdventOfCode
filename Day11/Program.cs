@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Day11
     {
         private static void DisplayState(State state, int moves)
         {
-            Console.CursorTop = 4;
+            Console.CursorTop = 5;
             Console.CursorLeft = 1;
 
             Console.WriteLine(moves);
@@ -36,32 +37,25 @@ namespace Day11
             var seen = new List<int>();
             var moves = 0;
             State done = null;
+            var clock = new Stopwatch();
+            clock.Start();
             while (!states.Any(x => x.Done))
             {
                 Console.CursorLeft = 1;
                 Console.Write($"Testing {++moves} moves...");
-                if (!states.Any())
-                {
-                    Console.WriteLine("wtf?!");
-                    Console.ReadLine();
-                    break;
-                }
-                else if (moves >= 175)
-                {
-                    Console.WriteLine("too high! something is wrong.");
-                    Console.ReadLine();
-                    break;
-                }
 
-                foreach (var state in states.ToArray())
+                Parallel.ForEach(states.ToArray(), (state, loopState) => //var state in states.ToArray())
+                //states.ToList().ForEach((state) =>
                 {
                     foreach (var possible in state.GetPossibleStates())
                     {
-                        if (possible.Done)
+                        if (possible.Done && done == null)
                         {
                             done = possible;
-                            Console.Write(" Found!");
-                            break;
+                            Console.WriteLine(" Found!");
+                            Console.WriteLine($" It took {(clock.Elapsed.Seconds > 10 ? $"{clock.Elapsed.Minutes}m {clock.Elapsed.Seconds}s" : $"{clock.ElapsedMilliseconds / 1000d} seconds")}");
+
+                            loopState.Break();
                         }
                         if (!seen.Contains(possible.GetHashCode()))
                         {
@@ -69,9 +63,8 @@ namespace Day11
                             newStates.Add(possible);
                         }
                     }
-                    if (done != null)
-                        break;
-                }
+                });
+
                 if (done != null)
                     break;
                 states = newStates;
@@ -88,7 +81,8 @@ namespace Day11
             foreach (var state in path.Reverse<State>())
             {
                 DisplayState(state, moves++);
-                Console.ReadLine();
+                if (path.First() != state)
+                    Console.ReadLine();
             }
             Console.WriteLine();
             Console.WriteLine(" Done!");
@@ -100,6 +94,7 @@ namespace Day11
             Console.WriteLine(" Test:");
             LoopSolver(InitialState.Example);
             Console.Clear();
+
 
             Console.WriteLine();
             Console.WriteLine(" Part 1:");
