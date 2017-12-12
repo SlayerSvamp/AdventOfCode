@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,11 +12,7 @@ namespace Day19
         static void RunA()
         {
             var numElves = 3005290;
-            var elves = new List<bool>();
-            for (int i = 0; i < numElves; i++)
-            {
-                elves.Add(true);
-            }
+            var elves = Enumerable.Range(0, numElves).Select(x => true).ToList();
             var loops = 1;
             var isTaking = false;
             while (elves.Count(elf => elf) > 1)
@@ -35,7 +32,7 @@ namespace Day19
                         }
                     }
                 }
-                Console.Write($"{elves.Count(elf => elf == true)} - {loops++}         \r");
+                Console.Write($"{elves.Count(elf => elf)} - {loops++}         \r");
             }
             Console.WriteLine($"The winning elf is number {elves.IndexOf(true) + 1}");
         }
@@ -43,29 +40,23 @@ namespace Day19
         {
 
             var numElves = 3005290;
-            var elves = new LinkedList<int>();
-            for (int i = 0; i < numElves; i++)
-            {
-                elves.AddLast(i);
-            }
-            var latest = DateTime.Now;
+            var elves = Enumerable.Range(0, numElves).ToList();
+            var clock = new Stopwatch();
+            clock.Start();
             while (elves.Count > 1)
             {
                 for (var i = 0; i < elves.Count;)
                 {
                     var opposingIndex = (i + elves.Count / 2) % elves.Count;
-                    var isAfter = opposingIndex > i;
                     if (elves.Count % 1000 == 0)
                     {
                         Console.Write("\r                                                        \r");
-                        Console.Write($"Removing {Math.Floor(1000000/(DateTime.Now-latest).TotalMilliseconds)} elves/second, {((numElves-elves.Count)*100)/numElves}% done, isAfter = {isAfter}");
-                        latest = DateTime.Now;
+                        Console.Write($"Removing {1000000 / (clock.ElapsedMilliseconds + 1)} elves/second, {((numElves - elves.Count) * 1000) / numElves / 10d}% done");
+                        clock.Restart();
                     }
-                    elves.Remove(elves.ElementAt(opposingIndex));
-                    if(isAfter)
-                    {
+                    elves.RemoveAt(opposingIndex);
+                    if (opposingIndex > i) // if the opposing index is lower, prevents stepping over an elf
                         i++;
-                    }
                 }
             }
             Console.WriteLine($"\r                                                             \rThe winning elf is number {elves.First() + 1}");
